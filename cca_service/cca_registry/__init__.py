@@ -1,0 +1,1 @@
+default_app_config = 'cca_service.cca_registry.apps.CcaServiceConfig'
