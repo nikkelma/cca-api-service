@@ -25,18 +25,29 @@ environ.Env.read_env()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # https://docs.djangoproject.com/en/3.0/ref/settings/
-DEBUG = ENV('DEBUG', cast=bool, default=False)
-ALLOWED_HOSTS = ENV('ALLOWED_HOSTS').split(',')
-CSRF_COOKIE_SECURE = not DEBUG
-SECRET_KEY = ENV('SECRET_KEY')
-SESSION_COOKIE_SECURE = not DEBUG
-
 # https://docs.djangoproject.com/en/3.0/ref/middleware/#django.middleware.security.SecurityMiddleware
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
-SECURE_HSTS_SECONDS = 0 if DEBUG else ENV('SECURE_HSTS_SECONDS', cast=int, default=60)
-SECURE_REFERRER_POLICY = 'strict-origin'
-SECURE_SSL_REDIRECT = not DEBUG
+DEBUG = ENV('DEBUG', cast=bool, default=False)
+
+if DEBUG:
+    ALLOWED_HOSTS = [] if not ENV('ALLOWED_HOSTS', default=[]) else ENV('ALLOWED_HOSTS').split(',')
+    CSRF_COOKIE_SECURE = False
+    SECRET_KEY = ENV('SECRET_KEY', default="FakeDevKey")
+    SESSION_COOKIE_SECURE = False
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_REFERRER_POLICY = 'strict-origin'
+    SECURE_SSL_REDIRECT = False
+else:
+    ALLOWED_HOSTS = ['.cca.gg'] if not ENV('ALLOWED_HOSTS', default=[]) else ENV('ALLOWED_HOSTS').split(',')
+    CSRF_COOKIE_SECURE = True
+    SECRET_KEY = ENV('SECRET_KEY', default="FakeProdKey")
+    SESSION_COOKIE_SECURE = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_HSTS_SECONDS = ENV('SECURE_HSTS_SECONDS', cast=int, default=60)
+    SECURE_REFERRER_POLICY = 'strict-origin'
+    SECURE_SSL_REDIRECT = True
 
 # Application definition
 
@@ -54,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -135,16 +147,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+STATIC_ROOT = './static/'
 STATIC_URL = '/static/'
 
-if DEBUG:
-    print(f'DEBUG: {DEBUG}')
-    print(f'ALLOWED_HOSTS: {ALLOWED_HOSTS}')
-    print(f'CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}')
-    print(f'SECRET_KEY: {SECRET_KEY}')
-    print(f'SESSION_COOKIE_SECURE: {SESSION_COOKIE_SECURE}')
-    print(f'SECURE_HSTS_INCLUDE_SUBDOMAINS: {SECURE_HSTS_INCLUDE_SUBDOMAINS}')
-    print(f'SECURE_HSTS_PRELOAD: {SECURE_HSTS_PRELOAD}')
-    print(f'SECURE_HSTS_SECONDS: {SECURE_HSTS_SECONDS}')
-    print(f'SECURE_REFERRER_POLICY: {SECURE_REFERRER_POLICY}')
-    print(f'SECURE_SSL_REDIRECT: {SECURE_SSL_REDIRECT}')
+
+# WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

@@ -1,0 +1,3 @@
+static
+db.sqlite*
+cca_service/.env
