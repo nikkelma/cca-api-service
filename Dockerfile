@@ -42,7 +42,7 @@ RUN pipenv install --deploy --system
 COPY . .
 
 # Generate static files
-RUN DATABASE_URL='' python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 # Change to a non-root user
 USER ${APP_USER}:${APP_USER}
